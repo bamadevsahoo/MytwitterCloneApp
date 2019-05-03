@@ -1,0 +1,109 @@
+﻿@model TwitterClone.Models.Account
+@{ 
+    if(ViewContext.IsChildAction!=true && !Request.IsAjaxRequest())
+    {
+        Layout = "~/Views/Shared/_DefaultLayoutPage.cshtml";
+
+    }
+    else
+    {
+        Layout = null;
+    }
+}
+@{
+    ViewBag.Title = "login";
+}
+<script type="text/javascript" language="javascript">
+    var urlContent = "@Url.Content("~/")";
+    window.onload = function window_OnLoad() {
+        nobackhfive();
+    }
+</script>
+<style>
+    .wrapper {
+        margin: 0 auto;
+    }
+    .contentSignin {
+        background-color: azure;
+        width: 400px;
+        height: 330px;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+        border-radius: 9px;
+    }
+
+    .innercontent {
+        padding: 18px;
+    }
+
+    .HeaderSignin {
+        background-color: #2ba6cb;
+        border-top-left-radius: 9px;
+        border-top-right-radius: 9px;
+        height: 51px;
+        align-items: center
+    }
+
+</style>
+
+
+
+<h2 style="color:turquoise">Welcome to My Twitter Clone </h2>
+
+<hr />
+    <div class="contentSignin">
+        @using (Html.BeginForm("login", "SignIn",FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="HeaderSignin">
+                <h5 style="padding-left:40%;padding-top:12px; font-size: 18px;margin-top: 0px">Login</h5>
+            </div>
+                <div class="innercontent">
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            @Html.LabelFor(model => model.userName, htmlAttributes: new { @class = "control-label " })
+
+                            @Html.EditorFor(model => model.userName, new { htmlAttributes = new { @class = "form-control" } })
+                            @Html.ValidationMessageFor(model => model.userName, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            @Html.LabelFor(model => model.passWord, htmlAttributes: new { @class = "control-label " })
+
+                            @Html.PasswordFor(model => model.passWord, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.passWord, "", new { @class = "text-danger" })
+                        </div>
+
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-offset-7 col-md-5">
+                            <input type="submit" value="Login" class="btn btn-primary" />
+                        </div>
+                    </div>
+                   
+                </div>
+
+        }
+
+        <div class="innercontent">
+            <h5>New User? @Html.ActionLink("SignUp", "SignUp")</h5>
+            @if (ViewBag.Inalidlogin != null && ViewBag.Inalidlogin != string.Empty)
+            {
+                <h5 class="alert-danger">@ViewBag.Inalidlogin</h5>
+            }
+        </div>
+       
+    </div>
+
+<div style="margin-top:460px">
+
+</div>

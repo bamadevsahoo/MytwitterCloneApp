@@ -1,0 +1,70 @@
+﻿@model TwitterClone.Person
+@{
+    if (ViewContext.IsChildAction != true && !Request.IsAjaxRequest())
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+
+    }
+    else
+    {
+        Layout = null;
+    }
+}
+
+@{
+    ViewBag.Title = "Details";
+}
+<script type="text/javascript" language="javascript">
+    var urlContent = "@Url.Content("~/")";
+</script>
+<p style="float:right">
+    @Html.ActionLink("Change Password", "UpdatePassword") |
+    @Html.ActionLink("Edit Profile", "Edit") |
+    @Html.ActionLink("Profile Details", "Details") |
+    @Html.ActionLink("Delete Profile", "Delete")     
+</p>
+
+
+<div>
+    <h4 style="color:cornflowerblue">Profile details</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        
+        <dt>
+            @Html.DisplayNameFor(model => model.fullName)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.fullName)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.email)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.email)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.joined)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.joined)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.active)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.active)
+        </dd>
+
+    </dl>
+</div>
+<div>
+    @Html.ActionLink("Back to Home", "Index", "Home")
+</div>
+

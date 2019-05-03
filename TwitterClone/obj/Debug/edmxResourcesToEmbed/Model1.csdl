@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="TwitterCloneDBModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+  <EntityType Name="FOLLOWING">
+    <Key>
+      <PropertyRef Name="Fid" />
+    </Key>
+    <Property Name="Fid" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="user_id" Type="String" MaxLength="25" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="following_id" Type="String" MaxLength="25" FixedLength="false" Unicode="false" Nullable="false" />
+  </EntityType>
+  <EntityType Name="Person">
+    <Key>
+      <PropertyRef Name="user_id" />
+    </Key>
+    <Property Name="user_id" Type="String" MaxLength="25" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="password" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="fullName" Type="String" MaxLength="30" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="email" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="joined" Type="DateTime" Precision="3" />
+    <Property Name="active" Type="Boolean" />
+    <NavigationProperty Name="TWEETs" Relationship="Self.FK_TWEETuser_id" FromRole="Person" ToRole="TWEET" />
+  </EntityType>
+  <EntityType Name="TWEET">
+    <Key>
+      <PropertyRef Name="tweet_id" />
+    </Key>
+    <Property Name="tweet_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="user_id" Type="String" MaxLength="25" FixedLength="false" Unicode="false" />
+    <Property Name="message" Type="String" MaxLength="140" FixedLength="false" Unicode="false" />
+    <Property Name="Created" Type="DateTime" Precision="3" />
+    <NavigationProperty Name="Person" Relationship="Self.FK_TWEETuser_id" FromRole="TWEET" ToRole="Person" />
+  </EntityType>
+  <Association Name="FK_TWEETuser_id">
+    <End Role="Person" Type="Self.Person" Multiplicity="0..1" />
+    <End Role="TWEET" Type="Self.TWEET" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Person">
+        <PropertyRef Name="user_id" />
+      </Principal>
+      <Dependent Role="TWEET">
+        <PropertyRef Name="user_id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <EntityContainer Name="TwitterCloneDBEntities1" annotation:LazyLoadingEnabled="true">
+    <EntitySet Name="FOLLOWINGs" EntityType="Self.FOLLOWING" />
+    <EntitySet Name="People" EntityType="Self.Person" />
+    <EntitySet Name="TWEETs" EntityType="Self.TWEET" />
+    <AssociationSet Name="FK_TWEETuser_id" Association="Self.FK_TWEETuser_id">
+      <End Role="Person" EntitySet="People" />
+      <End Role="TWEET" EntitySet="TWEETs" />
+    </AssociationSet>
+  </EntityContainer>
+</Schema>

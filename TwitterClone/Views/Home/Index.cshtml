@@ -1,0 +1,307 @@
+﻿@model TwitterClone.Person
+@{
+    if (ViewContext.IsChildAction != true && !Request.IsAjaxRequest())
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+
+    }
+    else
+    {
+        Layout = null;
+    }
+}
+@{
+    ViewBag.Title = "Index";
+}
+<script src="~/Scripts/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" language="javascript">
+    var urlContent = "@Url.Content("~/")";
+  
+</script>
+<style>
+    legend {
+        border-style: none;
+        border-width: 0;
+        font-size: 14px;
+        line-height: 20px;
+        margin-bottom: 0;
+        width: auto;
+        padding: 0 10px;
+    }
+
+    fieldset {
+        border: 3px solid #e0e0e0;
+        padding: 10px;
+    }
+
+    .spanUserID {
+        padding: 20px;
+        font-family: Calibri;
+        color: cornflowerblue;
+    }
+    .spanMessage {
+        font-family: Calibri;
+        margin: 0;
+        padding-left: 10px;
+        word-wrap: break-word;
+    }
+    input, select, textarea {
+        max-width: none;
+    }
+    .ScrollStyle {
+        max-height: 330px;
+        overflow-y: scroll;
+    }
+    .dipBlock {
+        display: block !important;
+    }
+
+    .dipNone {
+        display: none !important;
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-2">
+        @Html.Label("Follow", new { @class = "control-label " })
+        @Html.TextBox("txtSearchPerson", null, new { placeholder = "Search person", @maxlength = 25, @class = "form-control" })
+        <br />
+        <div id="followdiv" style="display:none;">
+            <span id="spnSrhUser" class="text-primary"></span> <u><a id="btnfollowUnfollow" value="Follow" /></u>
+        </div>
+        <h6 id="shrMsg"></h6>
+        <br />
+        <h4><a id="twtCnt" href="#"><u></u></a> Tweets</h4>
+        <br /><br />
+        <h4><a id="FollwingCnt" href="#"><u></u></a> Following</h4>
+        <br /><br />
+        <h4><a id="FollwertCnt" href="#"><u></u></a> Followers</h4>
+        <br /><br />
+    </div>
+    <div class="col-md-10">
+
+        @Html.Label("What are you doing ?", new { @class = "control-label " })
+        @Html.TextArea("MessageUpd", null, new { @class = "form-control", @rows = 3, maxlength = 130, placeholder = "What are you going to post today ?" })
+        <div id="textarea_feedback"></div>
+        <br />
+        <input type="button" id="btnUpdateMsg" value="Update" class="btn btn-primary" /> <span id="spnSuccess"></span>
+        <br />
+        <fieldset>
+            <legend>
+                <h4>Tweets</h4>
+            </legend>
+            <div id="tweetsDetails" >@*class="ScrollStyle"*@
+            </div>
+        </fieldset>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        LoadData();
+        LoadFollwingAndFollwerCount();
+        var text_max = 130;
+        $('#textarea_feedback').html(text_max + ' characters remaining');
+
+        $('#MessageUpd').keyup(function () {
+            var text_length = $('#MessageUpd').val().length;
+            var text_remaining = text_max - text_length;
+
+            $('#textarea_feedback').html(text_remaining + ' characters remaining');
+        });
+
+        $('#txtSearchPerson').keyup(function () {
+            var SrhPersontxt = $("#txtSearchPerson").val();           
+            $.ajax({
+                url: "/Home/SearchPerson",
+                method: "POST",
+                data: '{ "PersionUserId": "' + SrhPersontxt + '"}',               
+                dataType: 'json',
+                contentType: "application/json; charset=utf-8",
+                success: function (datas) {
+                    datas = JSON.parse(datas);
+                    if (datas.PersionId !="")
+                    {
+                        $('#shrMsg').empty();
+                        $('#followdiv').show();//.addClass("dipBlock");
+                        $("#spnSrhUser").text(datas.PersionId);
+                       
+                        if (datas.FollowCheck == "0") {
+                           
+                            $("#followdiv").find('#btnfollowUnfollow').addClass("text-success");
+                            $("#followdiv").find('#btnfollowUnfollow').text("Follow");
+                        }
+                        else {
+                            $("#followdiv").find('#btnfollowUnfollow').addClass("text-warning");
+                            $("#followdiv").find('#btnfollowUnfollow').text("Unfollow");
+                        }
+                    }
+                    else
+                    {
+                        $('#shrMsg').removeClass("dipNone");
+                        $('#shrMsg').addClass("dipBlock alert-danger");
+                        $("#shrMsg").text("search not found");
+                    }
+                },
+                error: function (ex) {
+                    var r = jQuery.parseJSON(response.responseText);
+                    alert("Message: " + r.Message);
+                    alert("StackTrace: " + r.StackTrace);
+                    alert("ExceptionType: " + r.ExceptionType);
+                }
+            });
+            return false;
+        });
+
+        $("#btnfollowUnfollow").click(function () {
+
+            var FollowPerson = $("#followdiv").find('#spnSrhUser').html(); 
+            
+            $.ajax({
+
+                url: "/Home/FollowPerson",
+                method: "POST",
+                data: '{ "PersionUserId": "' + FollowPerson + '"}',
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (Message) {
+                    Message = JSON.parse(Message);
+                    
+                    if (Message == "SUCCESS") {
+                        $("#followdiv").find('#btnfollowUnfollow').addClass("text-warning");
+                        $("#followdiv").find("#btnfollowUnfollow").text("Unfollow");
+                    }
+                    else
+                    {
+                        $("#followdiv").find('#btnfollowUnfollow').addClass("text-success");
+                        $("#followdiv").find("#btnfollowUnfollow").text("Follow");
+                    }
+                    LoadFollwingAndFollwerCount();
+                },
+                error: function (error) {
+                   
+                }
+            });
+            return false;
+
+        });
+   
+
+        
+        $("#btnUpdateMsg").click(function () {
+            if (validateMessage()) {
+                var Messagetxt = $("#MessageUpd").val();
+                $.ajax({
+
+                   url: "/Home/PostTwitte",
+                    method: "POST",
+                    data: '{ "messagePost": "' + Messagetxt + '"}',
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    success: function () {
+                        $("#MessageUpd").val('');
+                        $("#spnSuccess").removeClass("alert-danger");
+                        $("#spnSuccess").addClass("alert-success");
+                        $("#spnSuccess").text(" Posted successfully.");
+                        LoadData();
+                    },
+                    error: function (error) {
+                        $("#spnSuccess").addClass("alert-danger");
+                        $("#spnSuccess").text(" Error while posting");
+                    }
+                });
+                return false;
+            }
+            });
+    });
+
+
+    function LoadData() {
+        $('#tweetsDetails').empty();
+       
+        $.ajax({
+            url: "/Home/GetTwitte",
+            method: "GET",
+            dataType: 'json',
+            success: function (data) {
+                data = JSON.parse(data);            
+                $.each(data, function (i, item) {
+                    var rows = "<h5>"
+                        + "<span class='spanUserID form-control'>" + item.user_id + "    " + item.created + "</span>"
+                        + "<lable class='spanMessage '>" + item.messaage + "</lable>"
+                        + "</h5>";                  
+                    $('#tweetsDetails').append(rows);
+                });
+                LoadTweetCount();
+            },
+            error: function (ex) {
+                var r = jQuery.parseJSON(response.responseText);
+                alert("Message: " + r.Message);
+                alert("StackTrace: " + r.StackTrace);
+                alert("ExceptionType: " + r.ExceptionType);
+            }
+        });
+        return false;
+    }
+
+    function LoadTweetCount() {
+      
+        $.ajax({
+            url: "/Home/GetTwittecount",
+            method: "GET",
+            dataType: 'json',
+            success: function (data) {
+                data = JSON.parse(data);             
+                $("#twtCnt u").text(data);
+            },
+            error: function (ex) {
+                var r = jQuery.parseJSON(response.responseText);
+                alert("Message: " + r.Message);
+                alert("StackTrace: " + r.StackTrace);
+                alert("ExceptionType: " + r.ExceptionType);
+            }
+        });
+        return false;
+    }
+
+    function LoadFollwingAndFollwerCount() {
+
+        $.ajax({
+            url: "/Home/GetFollowingFollowercount",
+            method: "GET",
+            dataType: 'json',
+            success: function (data) {
+                data = JSON.parse(data);
+                $("#FollwingCnt u").text(data.FollowingCnt);
+                $("#FollwertCnt u").text(data.FollowerCnt);
+            },
+            error: function (ex) {
+                var r = jQuery.parseJSON(response.responseText);
+                alert("Message: " + r.Message);
+                alert("StackTrace: " + r.StackTrace);
+                alert("ExceptionType: " + r.ExceptionType);
+            }
+        });
+        return false;
+    }
+    function validateMessage()
+    {
+        if ($("#MessageUpd").val() == '')
+        {
+            $("#spnSuccess").removeClass("alert-success");
+            $("#spnSuccess").addClass("alert-danger");
+            $("#spnSuccess").text(" Please enter your message to post");
+            return false;
+        }
+        else
+        {
+            var text_max = 130;
+            $('#textarea_feedback').html(text_max + ' characters remaining');
+            return true;
+        }
+
+    }
+
+  
+</script>
